@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SCADA IoT — Xiaomi CP-Factory | Sistema Mejorado</title>
+
+  <!-- Dependencias externas -->
+  <link  rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     HEADER
+     ════════════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-left">
+    <div class="logo-badge"><i class="fa-solid fa-microchip"></i></div>
+    <div class="header-title">
+      <h1>Xiaomi CP-Factory SCADA</h1>
+      <p>Sistema Mejorado &nbsp;|&nbsp; Manufactura Flexible &nbsp;|&nbsp; Industry 4.0</p>
+    </div>
+  </div>
+
+  <div class="header-center">
+    <div class="hkpi">
+      <div class="val" style="color:var(--green)" id="hd-throughput">240</div>
+      <div class="lbl">Throughput</div>
+    </div>
+    <div class="hkpi">
+      <div class="val" style="color:var(--accent)" id="hd-pph">30</div>
+      <div class="lbl">Cel / hora</div>
+    </div>
+    <div class="hkpi">
+      <div class="val" style="color:var(--yellow)">53.2%</div>
+      <div class="lbl">OEE</div>
+    </div>
+    <div class="hkpi">
+      <div class="val" style="color:var(--green)">0</div>
+      <div class="lbl">WIP Final</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span style="font-size:12px;color:var(--green);font-weight:600">ONLINE</span>
+    <div class="shift-badge">
+      <i class="fa-solid fa-clock" style="margin-right:4px"></i>Turno A — 07:00–15:00
+    </div>
+    <div id="clock"></div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     CONTENIDO PRINCIPAL
+     ════════════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ── Barra de alertas ─────────────────────────────────────────── -->
+  <div class="alerts-bar">
+    <div class="alert-pill err">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Prensa de Cierre — Breakdown 10.65 % — Mantenimiento preventivo recomendado</span>
+    </div>
+    <div class="alert-pill warn">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>Dispensador de Tapas — Breakdown 0.68 % — Verificar estado</span>
+    </div>
+    <div class="alert-pill info">
+      <i class="fa-solid fa-circle-check"></i>
+      <span>WIP Final = 0 — Producción completada en 7h 59min 58s</span>
+    </div>
+    <div class="alert-pill info">
+      <i class="fa-solid fa-circle-check"></i>
+      <span>Rendimiento 100 % — Meta de 240 celulares alcanzada</span>
+    </div>
+  </div>
+
+  <!-- ── Sección: KPIs ────────────────────────────────────────────── -->
+  <div class="section-title">
+    <i class="fa-solid fa-gauge-high" style="color:var(--accent)"></i>
+    Indicadores Clave de Producción
+    <span class="live-tag"><span class="dot"></span>Live</span>
+  </div>
+
+  <div class="kpi-row">
+
+    <div class="kpi-card kpi-cyan">
+      <div class="icon-wrap"><i class="fa-solid fa-mobile-screen-button"></i></div>
+      <div class="k-val" id="kpi-throughput">240</div>
+      <div class="k-label">Throughput total</div>
+      <div class="k-sub trend-up"><i class="fa-solid fa-arrow-trend-up"></i> +49% vs sistema actual</div>
+    </div>
+
+    <div class="kpi-card kpi-green">
+      <div class="icon-wrap"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="k-val" id="kpi-good">144</div>
+      <div class="k-label">Celulares buenos</div>
+      <div class="k-sub" style="color:var(--muted)">Calidad 60 %</div>
+    </div>
+
+    <div class="kpi-card kpi-red">
+      <div class="icon-wrap"><i class="fa-solid fa-circle-xmark"></i></div>
+      <div class="k-val" id="kpi-defect">96</div>
+      <div class="k-label">Defectuosos</div>
+      <div class="k-sub trend-down"><i class="fa-solid fa-arrow-trend-down"></i> Tasa 40 %</div>
+    </div>
+
+    <div class="kpi-card kpi-yellow">
+      <div class="icon-wrap"><i class="fa-solid fa-gauge"></i></div>
+      <div class="k-val">30</div>
+      <div class="k-label">Cel / hora</div>
+      <div class="k-sub trend-up" style="color:var(--green)">
+        <i class="fa-solid fa-arrow-trend-up"></i> +10 vs actual
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-purple">
+      <div class="icon-wrap"><i class="fa-solid fa-layer-group"></i></div>
+      <div class="k-val">0</div>
+      <div class="k-label">WIP Final</div>
+      <div class="k-sub trend-up" style="color:var(--green)">
+        <i class="fa-solid fa-arrow-trend-down"></i> −79 vs actual
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-orange">
+      <div class="icon-wrap"><i class="fa-solid fa-stopwatch"></i></div>
+      <div class="k-val">7h59m</div>
+      <div class="k-label">Tiempo finalización</div>
+      <div class="k-sub" style="color:var(--muted)">Ciclo ideal: 2 min 42 s</div>
+    </div>
+
+  </div>
+
+  <!-- ── Sección: OEE + Mapa de línea ────────────────────────────── -->
+  <div class="section-title">
+    <i class="fa-solid fa-chart-pie" style="color:var(--accent)"></i>
+    OEE y Mapa de Línea de Producción
+  </div>
+
+  <div class="row2">
+
+    <!-- OEE card -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-pie"></i> OEE — Sistema Mejorado</div>
+      <div class="oee-wrap">
+
+        <div class="gauge-container">
+          <canvas id="oeeGauge"></canvas>
+          <div class="gauge-center">
+            <div class="oee-val">53.2%</div>
+            <div class="oee-lbl">OEE Global</div>
+          </div>
+        </div>
+
+        <div class="oee-factors">
+          <div class="oee-factor">
+            <div class="fval" style="color:var(--accent)">88.7%</div>
+            <div class="flbl">Disponibilidad</div>
+          </div>
+          <div class="oee-factor">
+            <div class="fval" style="color:var(--green)">100%</div>
+            <div class="flbl">Rendimiento</div>
+          </div>
+          <div class="oee-factor">
+            <div class="fval" style="color:var(--yellow)">60.0%</div>
+            <div class="flbl">Calidad</div>
+          </div>
+        </div>
+
+        <div class="oee-compare" style="margin-top:4px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px">
+            <i class="fa-solid fa-code-compare"></i> Comparativa
+          </div>
+          <div class="cmp-row">
+            <div class="cmp-lbl">Actual</div>
+            <div class="cmp-bar-bg">
+              <div class="cmp-bar" style="width:35.68%;background:var(--red)"></div>
+            </div>
+            <div class="cmp-pct" style="color:var(--red)">35.7%</div>
+          </div>
+          <div class="cmp-row">
+            <div class="cmp-lbl">Mejorado</div>
+            <div class="cmp-bar-bg">
+              <div class="cmp-bar" style="width:53.2%;background:var(--green)"></div>
+            </div>
+            <div class="cmp-pct" style="color:var(--green)">53.2%</div>
+          </div>
+          <div style="font-size:10px;color:var(--green);margin-top:8px;text-align:right">
+            <i class="fa-solid fa-arrow-trend-up"></i> +17.5 pp de mejora
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mapa de línea -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-diagram-project"></i> Flujo de Producción — Sistema Mejorado
+      </div>
+
+      <div class="line-map-scroll">
+        <div class="line-map" id="lineMap">
+
+          <!-- Estación 1: Almacenamiento de bases -->
+          <div class="station-node">
+            <div class="station-box active" id="sn-1">
+              <div class="station-icon">🏭</div>
+              <div class="station-num">Est. 1</div>
+              <div class="station-name">Almacenamiento<br>de Bases</div>
+              <div class="station-state state-running">Activo</div>
+              <div class="station-util">Suministro: 240 bases</div>
+            </div>
+          </div>
+
+          <div class="connector">
+            <div class="conn-line"><div class="conn-dot"></div></div>
+            <div class="conn-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+          <!-- Estación 2: Instalador PCB y Fusibles -->
+          <div class="station-node">
+            <div class="station-box active" id="sn-2">
+              <div class="station-icon">🤖</div>
+              <div class="station-num">Est. 2</div>
+              <div class="station-name">Instalador PCB<br>y Fusibles (Kuka)</div>
+              <div class="station-state state-running" id="sn2-state">Procesando</div>
+              <div class="station-util">Process: 25% | Idle: 72.3%</div>
+            </div>
+          </div>
+
+          <div class="connector">
+            <div class="conn-line"><div class="conn-dot" style="animation-delay:.6s"></div></div>
+            <div class="conn-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+          <!-- Estación 3: Dispensador de tapas -->
+          <div class="station-node">
+            <div class="station-box active" id="sn-3">
+              <div class="station-icon">📦</div>
+              <div class="station-num">Est. 3</div>
+              <div class="station-name">Dispensador<br>de Tapas</div>
+              <div class="station-state state-idle" id="sn3-state">En espera</div>
+              <div class="station-util">Process: 0.83% | Idle: 95.8%</div>
+            </div>
+          </div>
+
+          <div class="connector">
+            <div class="conn-line"><div class="conn-dot" style="animation-delay:1.2s"></div></div>
+            <div class="conn-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+          <!-- Estación 4: Prensa de cierre -->
+          <div class="station-node">
+            <div class="station-box warning" id="sn-4">
+              <div class="station-icon">⚙️</div>
+              <div class="station-num">Est. 4</div>
+              <div class="station-name">Prensa<br>de Cierre</div>
+              <div class="station-state state-fault" id="sn4-state">⚠ Breakdown</div>
+              <div class="station-util">Process: 8.33% | BD: 10.65%</div>
+            </div>
+          </div>
+
+          <div class="connector">
+            <div class="conn-line"><div class="conn-dot" style="animation-delay:1.8s"></div></div>
+            <div class="conn-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+          <!-- Estación 5: Control de calidad -->
+          <div class="station-node">
+            <div class="station-box active" id="sn-5">
+              <div class="station-icon">🔍</div>
+              <div class="station-num">Est. 5</div>
+              <div class="station-name">Control de<br>Calidad (Visión)</div>
+              <div class="station-state state-running">Clasificando</div>
+              <div class="station-util">Process: 8.33% | Idle: 81.3%</div>
+            </div>
+          </div>
+
+          <div class="connector" style="flex-direction:column;width:20px;align-items:center">
+            <div style="height:2px;width:20px;background:linear-gradient(90deg,var(--border),var(--green))"></div>
+          </div>
+
+          <!-- Nodo de clasificación final -->
+          <div class="split-wrap">
+            <div class="split-box"><i class="fa-solid fa-circle-check"></i> 144 Buenos</div>
+            <div style="height:2px;width:40px;background:var(--border)"></div>
+            <div class="split-box defect"><i class="fa-solid fa-circle-xmark"></i> 96 Defectos</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Strip informativo: AGV, Kuka e Inventario -->
+      <div style="display:flex;gap:14px;margin-top:14px;flex-wrap:wrap">
+
+        <div style="flex:1;min-width:160px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">
+            <i class="fa-solid fa-truck-fast" style="color:var(--accent)"></i> AGV
+          </div>
+          <div style="font-size:12px">Viaje vacío: <strong style="color:var(--accent)">36.2%</strong></div>
+          <div style="font-size:12px">Viaje cargado: <strong style="color:var(--green)">36.3%</strong></div>
+          <div style="font-size:12px">Inactivo: <strong style="color:var(--muted)">27.5%</strong></div>
+        </div>
+
+        <div style="flex:1;min-width:160px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">
+            <i class="fa-solid fa-robot" style="color:var(--purple)"></i> Robot Kuka
+          </div>
+          <div style="font-size:12px">Traslado vacío: <strong style="color:var(--purple)">1.67%</strong></div>
+          <div style="font-size:12px">Traslado cargado: <strong style="color:var(--purple)">1.67%</strong></div>
+          <div style="font-size:12px">Inactivo: <strong style="color:var(--muted)">96.7%</strong></div>
+        </div>
+
+        <div style="flex:1;min-width:160px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+          <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">
+            <i class="fa-solid fa-boxes-stacked" style="color:var(--yellow)"></i> Inventario
+          </div>
+          <div style="font-size:12px">PCBs en sistema: <strong style="color:var(--green)">0 (WIP)</strong></div>
+          <div style="font-size:12px">Tapas utilizadas: <strong style="color:var(--accent)">240</strong></div>
+          <div style="font-size:12px">Bases liberadas: <strong style="color:var(--accent)">240</strong></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sección: Estaciones + Recursos ──────────────────────────── -->
+  <div class="section-title">
+    <i class="fa-solid fa-industry" style="color:var(--accent)"></i>
+    Estado Detallado de Estaciones y Recursos
+  </div>
+
+  <div class="row3">
+
+    <!-- Tabla de estaciones -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-table-list"></i>
+        Distribución de Estados por Estación (Sistema Mejorado)
+      </div>
+      <table class="st-table">
+        <thead>
+          <tr>
+            <th>Estación</th>
+            <th>Distribución de tiempo</th>
+            <th style="text-align:right">Util.</th>
+            <th style="text-align:right">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Instalador PCBs y Fusibles -->
+          <tr>
+            <td>
+              <div class="st-name">
+                <div class="st-dot" style="background:var(--green)"></div>
+                <div>
+                  <div>Instalador PCBs y Fusibles</div>
+                  <div style="font-size:10px;color:var(--muted)">Est. 2 — Robot KUKA</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="seg-bar">
+                <div class="seg" style="width:25%;background:var(--green)" title="Processing 25%"></div>
+                <div class="seg" style="width:1.86%;background:var(--accent)" title="Collecting 1.86%"></div>
+                <div class="seg" style="width:0.83%;background:var(--yellow)" title="Waiting Transport 0.83%"></div>
+                <div class="seg" style="width:72.31%;background:rgba(100,116,139,.25)" title="Idle 72.31%"></div>
+              </div>
+              <div class="seg-legend">
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--green)"></div>Proc. 25%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--accent)"></div>Coll. 1.86%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--yellow)"></div>W.Transp. 0.83%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:rgba(100,116,139,.35)"></div>Idle 72.31%</div>
+              </div>
+            </td>
+            <td style="text-align:right;color:var(--green);font-weight:700">25.0%</td>
+            <td style="text-align:right"><span class="station-state state-running">OK</span></td>
+          </tr>
+
+          <!-- Robot Kuka -->
+          <tr>
+            <td>
+              <div class="st-name">
+                <div class="st-dot" style="background:var(--purple)"></div>
+                <div>
+                  <div>Robot Kuka</div>
+                  <div style="font-size:10px;color:var(--muted)">Transporte interno</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="seg-bar">
+                <div class="seg" style="width:1.67%;background:var(--purple)" title="Travel Empty 1.67%"></div>
+                <div class="seg" style="width:1.67%;background:var(--accent)" title="Travel Loaded 1.67%"></div>
+                <div class="seg" style="width:96.66%;background:rgba(100,116,139,.25)" title="Idle 96.66%"></div>
+              </div>
+              <div class="seg-legend">
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--purple)"></div>T.Vacío 1.67%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--accent)"></div>T.Cargado 1.67%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:rgba(100,116,139,.35)"></div>Idle 96.66%</div>
+              </div>
+            </td>
+            <td style="text-align:right;color:var(--purple);font-weight:700">3.34%</td>
+            <td style="text-align:right"><span class="station-state state-idle">Idle</span></td>
+          </tr>
+
+          <!-- Dispensador de tapas -->
+          <tr>
+            <td>
+              <div class="st-name">
+                <div class="st-dot" style="background:var(--accent)"></div>
+                <div>
+                  <div>Dispensador de Tapas</div>
+                  <div style="font-size:10px;color:var(--muted)">Est. 3 — Suministro de tapas</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="seg-bar">
+                <div class="seg" style="width:0.83%;background:var(--green)" title="Processing 0.83%"></div>
+                <div class="seg" style="width:2.72%;background:var(--accent)" title="Collecting 2.72%"></div>
+                <div class="seg" style="width:0.68%;background:var(--red)" title="Breakdown 0.68%"></div>
+                <div class="seg" style="width:95.77%;background:rgba(100,116,139,.25)" title="Idle 95.77%"></div>
+              </div>
+              <div class="seg-legend">
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--green)"></div>Proc. 0.83%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--accent)"></div>Coll. 2.72%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--red)"></div>BDown 0.68%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:rgba(100,116,139,.35)"></div>Idle 95.77%</div>
+              </div>
+            </td>
+            <td style="text-align:right;color:var(--accent);font-weight:700">0.83%</td>
+            <td style="text-align:right"><span class="station-state state-running">OK</span></td>
+          </tr>
+
+          <!-- Prensa de cierre -->
+          <tr>
+            <td>
+              <div class="st-name">
+                <div class="st-dot" style="background:var(--red)"></div>
+                <div>
+                  <div>Prensa de Cierre</div>
+                  <div style="font-size:10px;color:var(--muted)">Est. 4 — Cierre final</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="seg-bar">
+                <div class="seg" style="width:8.33%;background:var(--green)" title="Processing 8.33%"></div>
+                <div class="seg" style="width:10.65%;background:var(--red)" title="Breakdown 10.65%"></div>
+                <div class="seg" style="width:81.02%;background:rgba(100,116,139,.25)" title="Idle 81.02%"></div>
+              </div>
+              <div class="seg-legend">
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--green)"></div>Proc. 8.33%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--red)"></div>BDown 10.65%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:rgba(100,116,139,.35)"></div>Idle 81.02%</div>
+              </div>
+            </td>
+            <td style="text-align:right;color:var(--red);font-weight:700">8.33%</td>
+            <td style="text-align:right"><span class="station-state state-fault">⚠ Fault</span></td>
+          </tr>
+
+          <!-- Control de calidad -->
+          <tr>
+            <td>
+              <div class="st-name">
+                <div class="st-dot" style="background:var(--yellow)"></div>
+                <div>
+                  <div>Control de Calidad</div>
+                  <div style="font-size:10px;color:var(--muted)">Est. 5 — Visión artificial</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="seg-bar">
+                <div class="seg" style="width:8.33%;background:var(--green)" title="Processing 8.33%"></div>
+                <div class="seg" style="width:10.41%;background:var(--yellow)" title="Waiting Transport 10.41%"></div>
+                <div class="seg" style="width:81.26%;background:rgba(100,116,139,.25)" title="Idle 81.26%"></div>
+              </div>
+              <div class="seg-legend">
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--green)"></div>Proc. 8.33%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--yellow)"></div>W.Transp. 10.41%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:rgba(100,116,139,.35)"></div>Idle 81.26%</div>
+              </div>
+            </td>
+            <td style="text-align:right;color:var(--yellow);font-weight:700">8.33%</td>
+            <td style="text-align:right"><span class="station-state state-running">OK</span></td>
+          </tr>
+
+          <!-- AGV -->
+          <tr>
+            <td>
+              <div class="st-name">
+                <div class="st-dot" style="background:var(--orange)"></div>
+                <div>
+                  <div>AGV</div>
+                  <div style="font-size:10px;color:var(--muted)">Transporte de componentes</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="seg-bar">
+                <div class="seg" style="width:36.17%;background:var(--orange)" title="Travel Empty 36.17%"></div>
+                <div class="seg" style="width:36.32%;background:var(--accent)" title="Travel Loaded 36.32%"></div>
+                <div class="seg" style="width:27.51%;background:rgba(100,116,139,.25)" title="Idle 27.51%"></div>
+              </div>
+              <div class="seg-legend">
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--orange)"></div>T.Vacío 36.17%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:var(--accent)"></div>T.Cargado 36.32%</div>
+                <div class="seg-item"><div class="seg-swatch" style="background:rgba(100,116,139,.35)"></div>Idle 27.51%</div>
+              </div>
+            </td>
+            <td style="text-align:right;color:var(--orange);font-weight:700">72.5%</td>
+            <td style="text-align:right"><span class="station-state state-running">Activo</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Cards de recursos -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-server"></i> Recursos de Planta</div>
+      <div class="resource-list">
+
+        <div class="res-card">
+          <div class="res-header">
+            <div class="res-name"><i class="fa-solid fa-robot" style="color:var(--purple)"></i> Robot Kuka</div>
+            <div class="res-badge" style="background:rgba(100,116,139,.15);color:var(--muted)">96.7% Idle</div>
+          </div>
+          <div class="res-chart-wrap">
+            <div class="res-seg-bar">
+              <div style="width:1.67%;background:var(--purple);border-radius:4px 0 0 4px"></div>
+              <div style="width:1.67%;background:var(--accent)"></div>
+              <div style="flex:1;background:rgba(100,116,139,.2);border-radius:0 4px 4px 0"></div>
+            </div>
+          </div>
+          <div class="res-detail">
+            <div class="res-stat"><span>Vacío:</span> <strong style="color:var(--purple)">1.67%</strong></div>
+            <div class="res-stat"><span>Cargado:</span> <strong style="color:var(--accent)">1.67%</strong></div>
+            <div class="res-stat"><span>Idle:</span> <strong style="color:var(--muted)">96.66%</strong></div>
+          </div>
+        </div>
+
+        <div class="res-card">
+          <div class="res-header">
+            <div class="res-name"><i class="fa-solid fa-truck-fast" style="color:var(--orange)"></i> AGV</div>
+            <div class="res-badge" style="background:rgba(255,145,0,.15);color:var(--orange)">72.5% Activo</div>
+          </div>
+          <div class="res-chart-wrap">
+            <div class="res-seg-bar">
+              <div style="width:36.17%;background:var(--orange);border-radius:4px 0 0 4px"></div>
+              <div style="width:36.32%;background:var(--accent)"></div>
+              <div style="flex:1;background:rgba(100,116,139,.2);border-radius:0 4px 4px 0"></div>
+            </div>
+          </div>
+          <div class="res-detail">
+            <div class="res-stat"><span>T. Vacío:</span> <strong style="color:var(--orange)">36.17%</strong></div>
+            <div class="res-stat"><span>T. Cargado:</span> <strong style="color:var(--accent)">36.32%</strong></div>
+            <div class="res-stat"><span>Idle:</span> <strong style="color:var(--muted)">27.51%</strong></div>
+          </div>
+        </div>
+
+        <div class="res-card">
+          <div class="res-header">
+            <div class="res-name"><i class="fa-solid fa-user-gear" style="color:var(--yellow)"></i> Operario de Tapas</div>
+            <div class="res-badge" style="background:rgba(100,116,139,.1);color:var(--muted)">1.34% Uso</div>
+          </div>
+          <div class="res-chart-wrap">
+            <div class="res-seg-bar">
+              <div style="width:1.34%;background:var(--yellow);border-radius:4px 0 0 4px"></div>
+              <div style="width:0.02%;background:var(--accent)"></div>
+              <div style="flex:1;background:rgba(100,116,139,.2);border-radius:0 4px 4px 0"></div>
+            </div>
+          </div>
+          <div class="res-detail">
+            <div class="res-stat"><span>Utilize:</span> <strong style="color:var(--yellow)">1.34%</strong></div>
+            <div class="res-stat"><span>Idle:</span> <strong style="color:var(--muted)">98.64%</strong></div>
+          </div>
+        </div>
+
+        <div class="res-card" style="border-color:rgba(0,230,118,.2)">
+          <div class="res-header">
+            <div class="res-name">
+              <i class="fa-solid fa-circle-check" style="color:var(--green)"></i> Control Calidad Auto.
+            </div>
+            <div class="res-badge" style="background:rgba(0,230,118,.15);color:var(--green)">✓ Automatizado</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            Reemplaza operario separador manual (97% Collecting) con estación automática de visión artificial.
+            Tasa de clasificación: <strong style="color:var(--green)">100%</strong> de unidades procesadas.
+          </div>
+          <div class="res-detail" style="margin-top:8px">
+            <div class="res-stat"><span>Buenos enviados:</span> <strong style="color:var(--green)">144</strong></div>
+            <div class="res-stat"><span>Defectos separados:</span> <strong style="color:var(--red)">96</strong></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sección: Gráficas comparativas ──────────────────────────── -->
+  <div class="section-title">
+    <i class="fa-solid fa-chart-bar" style="color:var(--accent)"></i>
+    Análisis Comparativo y Producción
+  </div>
+
+  <div class="row4">
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-bar"></i> Throughput Actual vs Mejorado</div>
+      <div class="chart-wrap"><canvas id="chartComparativa"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-chart-simple"></i> Factores OEE Comparados</div>
+      <div class="chart-wrap"><canvas id="chartOEEFactors"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-circle-half-stroke"></i> Utilización de Estaciones (Mejorado)</div>
+      <div class="chart-wrap"><canvas id="chartUtil"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- ── Sección: Curva de producción ────────────────────────────── -->
+  <div class="section-title">
+    <i class="fa-solid fa-wave-square" style="color:var(--accent)"></i>
+    Producción Acumulada Simulada — Jornada 8h
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <i class="fa-solid fa-chart-line"></i> Curva de Producción — Celulares Buenos y Defectuosos
+    </div>
+    <div class="timeline-wrap"><canvas id="chartTimeline"></canvas></div>
+  </div>
+
+  <!-- ── Sección: Tabla comparativa ──────────────────────────────── -->
+  <div class="section-title">
+    <i class="fa-solid fa-code-compare" style="color:var(--accent)"></i>
+    Tabla Comparativa Sistema Actual vs Mejorado
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="fa-solid fa-table"></i> Resumen Comparativo de Indicadores Clave</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:separate;border-spacing:0;font-size:13px">
+        <thead>
+          <tr style="background:rgba(255,255,255,.04)">
+            <th style="padding:12px 16px;text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border)">Indicador</th>
+            <th style="padding:12px 16px;text-align:center;color:var(--red);font-size:11px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border)">Sistema Actual</th>
+            <th style="padding:12px 16px;text-align:center;color:var(--green);font-size:11px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border)">Sistema Mejorado</th>
+            <th style="padding:12px 16px;text-align:center;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border)">Variación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5)">
+            <td style="padding:11px 16px;font-weight:600">Throughput</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--red)">161 celulares</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">240 celulares</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-up"></i> +49%</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5);background:rgba(255,255,255,.02)">
+            <td style="padding:11px 16px;font-weight:600">Producción promedio</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--red)">20.1 cel/h</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">30.0 cel/h</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-up"></i> +9.9 cel/h</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5)">
+            <td style="padding:11px 16px;font-weight:600">Celulares buenos</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--red)">97</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">144</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-up"></i> +48.5%</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5);background:rgba(255,255,255,.02)">
+            <td style="padding:11px 16px;font-weight:600">WIP Final</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--red)">79 unidades</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">0 unidades</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-down"></i> −100%</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5)">
+            <td style="padding:11px 16px;font-weight:600">OEE</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--red)">35.68%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">53.20%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-up"></i> +17.5 pp</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5);background:rgba(255,255,255,.02)">
+            <td style="padding:11px 16px;font-weight:600">Disponibilidad</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--yellow)">88.28%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">88.67%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700">+0.39 pp</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5)">
+            <td style="padding:11px 16px;font-weight:600">Rendimiento</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--red)">67.08%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">100%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-up"></i> +32.9 pp</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(30,45,68,.5);background:rgba(255,255,255,.02)">
+            <td style="padding:11px 16px;font-weight:600">Calidad</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--muted)">60.25%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--muted)">60.00%</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--muted)">≈ igual</td>
+          </tr>
+          <tr>
+            <td style="padding:11px 16px;font-weight:600">Ciclo ideal</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--muted)">6 min 23 s</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green)">2 min 42 s</td>
+            <td style="padding:11px 16px;text-align:center;color:var(--green);font-weight:700"><i class="fa-solid fa-arrow-trend-down"></i> −57.6%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     FOOTER
+     ════════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div>Xiaomi CP-Factory SCADA Dashboard &mdash; Sistema Mejorado &mdash; Manufactura Flexible 2026</div>
+  <div>Sofía Vega &bull; Andrés Felipe Trujillo &bull; Martín Cadena &nbsp;|&nbsp; Ingeniería Javeriana</div>
+</footer>
+
+<!-- Script propio (al final del body para que el DOM esté listo) -->
+<script src="dashboard.js"></script>
+
+</body>
+</html>
